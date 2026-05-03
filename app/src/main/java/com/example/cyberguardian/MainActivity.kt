@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,21 +31,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cyberguardian.navigation.NavGraph
+import com.example.cyberguardian.presentation.scan.scannerViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Makes UI draw behind system bars
         enableEdgeToEdge()
-        setContent {
-            CyberGuardianTheme {
-               Column(
-                   modifier = Modifier.fillMaxSize().padding(16.dp),
-                   verticalArrangement = Arrangement.Center,
-                   horizontalAlignment = Alignment.CenterHorizontally
 
-               ) {
-                    Text(text = "🙏🏼 CyberGuardian", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-               }
+        setContent {
+//            Apply app themes
+            CyberGuardianTheme {
+                NavGraph()
+
             }
         }
     }
