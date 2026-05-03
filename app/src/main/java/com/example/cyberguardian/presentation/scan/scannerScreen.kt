@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -28,60 +29,74 @@ import com.example.cyberguardian.data.ScanResult
 @Composable
 fun ScanScreen(
     viewModel: scannerViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    context: Context
+    context: Context,
+    onNavigateToPhishing: () -> Unit
 ) {
     val isScanning = viewModel.isScanning
     val progress = viewModel.progress
     val results = viewModel.results
     val threatsFound = viewModel.threatsFound
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF121212))
-            .padding(16.dp)
-    ) {
-        // Header / Status Area
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            ScanButton(
-                isScanning = isScanning,
-                onClick = { viewModel.startFullScan(context) }
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onNavigateToPhishing,
+                icon = { Icon(Icons.Default.Link, contentDescription = null) },
+                text = { Text("Phishing Scan") },
+                containerColor = Color(0xFF2E7D32),
+                contentColor = Color.White
             )
-        }
-
-        if (isScanning) {
-            LinearProgressIndicator(
-                progress = { progress },
+        },
+        containerColor = Color(0xFF121212)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            // Header / Status Area
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = Color(0xFF2E7D32),
-                trackColor = Color.DarkGray
-            )
-            Text(
-                text = "Scanning... ${(progress * 100).toInt()}%",
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        } else if (results.isNotEmpty()) {
-            ScanSummary(threatsFound = threatsFound, totalApps = results.size)
-        }
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                ScanButton(
+                    isScanning = isScanning,
+                    onClick = { viewModel.startFullScan(context) }
+                )
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            if (isScanning) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = Color(0xFF2E7D32),
+                    trackColor = Color.DarkGray
+                )
+                Text(
+                    text = "Scanning... ${(progress * 100).toInt()}%",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else if (results.isNotEmpty()) {
+                ScanSummary(threatsFound = threatsFound, totalApps = results.size)
+            }
 
-        // Results List
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(results) { result ->
-                ScanResultItem(result)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Results List
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(results) { result ->
+                    ScanResultItem(result)
+                }
             }
         }
     }
