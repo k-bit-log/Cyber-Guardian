@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cyberguardian.presentation.awareness.AwarenessScreen
 import com.example.cyberguardian.presentation.phishing.PhishingScreen
 import com.example.cyberguardian.presentation.scan.ScanScreen
 
@@ -19,12 +20,19 @@ fun NavGraph() {
         composable("malware_scanner") {
             ScanScreen(
                 context = LocalContext.current,
-                onNavigateToPhishing = { navController.navigate("phishing_detector") }
+                onNavigateToPhishing = { navController.navigate("phishing_detector") },
+                onNavigateToAwareness = { navController.navigate("awareness") }
             )
         }
 
         composable("phishing_detector") {
             PhishingScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("awareness") {
+            AwarenessScreen(
                 onBack = { navController.popBackStack() }
             )
         }

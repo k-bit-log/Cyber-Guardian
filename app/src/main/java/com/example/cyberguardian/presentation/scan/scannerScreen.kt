@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Warning
@@ -30,7 +31,8 @@ import com.example.cyberguardian.data.ScanResult
 fun ScanScreen(
     viewModel: scannerViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     context: Context,
-    onNavigateToPhishing: () -> Unit
+    onNavigateToPhishing: () -> Unit,
+    onNavigateToAwareness: () -> Unit
 ) {
     val isScanning = viewModel.isScanning
     val progress = viewModel.progress
@@ -39,13 +41,23 @@ fun ScanScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNavigateToPhishing,
-                icon = { Icon(Icons.Default.Link, contentDescription = null) },
-                text = { Text("Phishing Scan") },
-                containerColor = Color(0xFF2E7D32),
-                contentColor = Color.White
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                FloatingActionButton(
+                    onClick = onNavigateToAwareness,
+                    containerColor = Color(0xFF1565C0),
+                    contentColor = Color.White,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Icon(Icons.Default.Info, contentDescription = "Awareness")
+                }
+                ExtendedFloatingActionButton(
+                    onClick = onNavigateToPhishing,
+                    icon = { Icon(Icons.Default.Link, contentDescription = null) },
+                    text = { Text("Phishing Scan") },
+                    containerColor = Color(0xFF2E7D32),
+                    contentColor = Color.White
+                )
+            }
         },
         containerColor = Color(0xFF121212)
     ) { padding ->
