@@ -8,11 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cyberguardian.data.ScanResult
-import com.example.cyberguardian.data.ScannerResultModel
 import com.example.cyberguardian.domain.scannerengine.ScannerEngine
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class scannerViewModel() : ViewModel() {
@@ -37,13 +34,18 @@ class scannerViewModel() : ViewModel() {
 
         viewModelScope.launch {
 
-            val apps = ScannerEngine(context)
-            val total = apps.size
+            val engine = ScannerEngine(context)
+            val total = engine.size
             var processed = 0
 
-            for (app in apps) {
+            if (total == 0) {
+                isScanning = false
+                return@launch
+            }
 
-                val result = ScannerEngine.scanApp(context, app)
+            for (app in engine) {
+
+                val result = engine.scanApp(context, app)
 
                 results.add(result)
 
