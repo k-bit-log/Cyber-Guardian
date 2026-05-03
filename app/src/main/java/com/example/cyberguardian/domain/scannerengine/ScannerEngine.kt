@@ -57,6 +57,11 @@ class ScannerEngine(private val context: Context) : Iterable<ScannerResultModel>
         val threats = mutableListOf<String>()
         var score = 0
 
+        if (app.isSideloaded) {
+            score += 20
+            threats.add("This app was sideloaded (installed from an APK file instead of the Play Store), which increases the risk of it being untrusted or modified.")
+        }
+
         try {
             val pm = context.packageManager
             val pkgInfo = pm.getPackageInfo(app.packageName, PackageManager.GET_PERMISSIONS)

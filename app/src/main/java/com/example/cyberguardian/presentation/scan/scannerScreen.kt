@@ -1,8 +1,10 @@
 package com.example.cyberguardian.presentation.scan
 
 import android.content.Context
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Warning
@@ -198,73 +202,123 @@ fun ScanSummary(threatsFound: Int, totalApps: Int) {
 
 @Composable
 fun ScanResultItem(result: ScanResult) {
+    var expanded by remember { mutableStateOf(false) }
+    
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { if (result.threats.isNotEmpty()) expanded = !expanded },
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (result.riskScore > 50) Color(0xFF311B1B) else Color(0xFF1B2E1B)),
-                contentAlignment = Alignment.Center
+        Column {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = if (result.riskScore > 50) Icons.Default.BugReport else Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = if (result.riskScore > 50) Color.Red else Color.Green
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (result.riskScore > 50) Color(0xFF311B1B) else Color(0xFF1B2E1B)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (result.riskScore > 50) Icons.Default.BugReport else Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = if (result.riskScore > 50) Color.Red else Color.Green
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = result.appName,
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
+                        )
+                        if (result.isSideloaded) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                color = Color(0xFFFBC02D),
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "APK",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
                     Text(
-                        text = result.appName,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
+                        text = result.packageName,
+                        color = Color.Gray,
+                        fontSize = 12.sp,
                         maxLines = 1
                     )
-                    if (result.isSideloaded) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            color = Color(0xFFFBC02D),
-                            shape = RoundedCornerShape(4.dp)
+                }
+                
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Risk: ${result.riskScore}",
+                        color = when {
+                            result.riskScore > 70 -> Color.Red
+                            result.riskScore > 30 -> Color(0xFFFBC02D)
+                            else -> Color.Green
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                    if (result.threats.isNotEmpty()) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            
+            AnimatedVisibility(visible = expanded) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    HorizontalDivider(color = Color.DarkGray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Detected Issues:",
+                        color = Color.LightGray,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    result.threats.forEach { threat ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 2.dp)
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(4.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Red)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "APK",
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color.Black
+                                text = threat,
+                                color = Color.White,
+                                fontSize = 13.sp
                             )
                         }
                     }
                 }
-                Text(
-                    text = result.packageName,
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    maxLines = 1
-                )
-            }
-            
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "Risk: ${result.riskScore}",
-                    color = when {
-                        result.riskScore > 70 -> Color.Red
-                        result.riskScore > 30 -> Color(0xFFFBC02D)
-                        else -> Color.Green
-                    },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
             }
         }
     }

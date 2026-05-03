@@ -2,74 +2,31 @@ package com.example.cyberguardian.domain.scannerengine
 
 import android.Manifest
 
-
-//🔍 Concept: Permissions don’t equal malware, but certain combinations strongly correlate with abuse.
-//🧠 Risk model (example)
-//Pattern	                                    Risk
-//READ_SMS + INTERNET	                        High
-//ACCESSIBILITY + INTERNET	                    Critical
-//SYSTEM_ALERT_WINDOW + BANK APP FOREGROUND	    Critical
-//BOOT_COMPLETED + WAKE_LOCK	                Medium
-//⚠️ Counterpoint: Accessibility is heavily used by legit apps — false positives are inevitable.
-
-
 class PermissionRiskEngine {
-    private val riskyPermissions = setOf(
-        Manifest.permission.READ_SMS,
-        Manifest.permission.READ_CALL_LOG,
-        Manifest.permission.SYSTEM_ALERT_WINDOW,
-        Manifest.permission.INSTALL_PACKAGES,
-        Manifest.permission.WRITE_SETTINGS,
-        Manifest.permission.CAMERA
+    private val riskyPermissions = mapOf(
+        Manifest.permission.READ_SMS to "Can read your private text messages and OTPs.",
+        Manifest.permission.READ_CALL_LOG to "Can access your call history and contact details.",
+        Manifest.permission.SYSTEM_ALERT_WINDOW to "Can show windows over other apps, potentially stealing data via overlays.",
+        Manifest.permission.INSTALL_PACKAGES to "Can install other applications without your explicit consent.",
+        Manifest.permission.WRITE_SETTINGS to "Can modify system settings, which might be used to weaken security.",
+        Manifest.permission.CAMERA to "Can access your camera, potentially taking photos or videos without notice.",
+        Manifest.permission.RECORD_AUDIO to "Can record audio using the microphone, potentially eavesdropping.",
+        Manifest.permission.ACCESS_FINE_LOCATION to "Can track your precise physical location."
     )
 
     fun evaluate(permissions: Array<String>?): Pair<Int, List<String>> {
-
         if (permissions == null) return 0 to emptyList()
 
         val reasons = mutableListOf<String>()
         var score = 0
 
-        permissions.forEach {
-            if (riskyPermissions.contains(it)) {
+        permissions.forEach { permission ->
+            riskyPermissions[permission]?.let { description ->
                 score += 10
-                reasons.add("Uses risky permission: $it")
+                reasons.add(description)
             }
         }
 
         return score to reasons
     }
 }
-
-
-// Prev Code
-
-//    data class RiskResult(
-//        val score: Int,
-//        val reasons: List<String>
-//    )
-//
-//    fun evaluate(permissions: List<String>): RiskResult {
-//        var score = 0
-//        val reasons = mutableListOf<String>()
-//
-//        if (
-//            permissions.contains(Manifest.permission.READ_SMS) &&
-//            permissions.contains(Manifest.permission.INTERNET)
-//        ) {
-//            score += 30
-//            reasons.add("Can read SMS and send data online")
-//        }
-//
-//        if (permissions.contains(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)) {
-//            score += 50
-//            reasons.add("Accessibility access enables spyware behavior")
-//        }
-//
-//        if (permissions.contains(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
-//            score += 20
-//            reasons.add("Overlay permission can be used for phishing")
-//        }
-//
-//        return RiskResult(score.coerceAtMost(100), reasons)
-//    }
