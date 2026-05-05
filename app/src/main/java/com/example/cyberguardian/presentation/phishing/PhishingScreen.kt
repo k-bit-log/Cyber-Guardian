@@ -1,11 +1,8 @@
 package com.example.cyberguardian.presentation.phishing
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -19,97 +16,85 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cyberguardian.data.PhishingScanResult
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhishingScreen(
-    viewModel: PhishingViewModel = viewModel(),
-    onBack: () -> Unit
+    viewModel: PhishingViewModel = viewModel()
 ) {
     var urlInput by remember { mutableStateOf("") }
     val uiState = viewModel.uiState
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Phishing Link Detector", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
-            )
-        },
-        containerColor = Color(0xFF121212)
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = urlInput,
-                onValueChange = { urlInput = it },
-                label = { Text("Enter URL to scan") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color(0xFF2E7D32),
-                    unfocusedBorderColor = Color.Gray,
-                    focusedLabelColor = Color(0xFF2E7D32),
-                    unfocusedLabelColor = Color.Gray
-                ),
-                singleLine = true,
-                trailingIcon = {
-                    if (urlInput.isNotEmpty()) {
-                        IconButton(onClick = { urlInput = "" }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear", tint = Color.Gray)
-                        }
-                    }
-                }
-            )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            "Phishing Link Detector",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { viewModel.scanUrl(urlInput) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = urlInput.isNotBlank() && uiState !is PhishingUiState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
-            ) {
-                if (uiState is PhishingUiState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                } else {
-                    Text("Analyze URL")
+        OutlinedTextField(
+            value = urlInput,
+            onValueChange = { urlInput = it },
+            label = { Text("Enter URL to scan") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = Color(0xFF2E7D32),
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color(0xFF2E7D32),
+                unfocusedLabelColor = Color.Gray
+            ),
+            singleLine = true,
+            trailingIcon = {
+                if (urlInput.isNotEmpty()) {
+                    IconButton(onClick = { urlInput = "" }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear", tint = Color.Gray)
+                    }
                 }
             }
+        )
 
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            when (uiState) {
-                is PhishingUiState.Idle -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Enter a URL and click Analyze to check for phishing.", color = Color.Gray)
-                    }
+        Button(
+            onClick = { viewModel.scanUrl(urlInput) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = urlInput.isNotBlank() && uiState !is PhishingUiState.Loading,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+        ) {
+            if (uiState is PhishingUiState.Loading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+            } else {
+                Text("Analyze URL")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        when (uiState) {
+            is PhishingUiState.Idle -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Enter a URL and click Analyze to check for phishing.", color = Color.Gray)
                 }
-                is PhishingUiState.Loading -> {
-                    // Handled in button, but could show a separate overlay
-                }
-                is PhishingUiState.Success -> {
-                    PhishingResultContent(uiState.result)
-                }
-                is PhishingUiState.Error -> {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF311B1B)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(uiState.message, color = Color.White)
-                        }
+            }
+            is PhishingUiState.Loading -> { }
+            is PhishingUiState.Success -> {
+                PhishingResultContent(uiState.result)
+            }
+            is PhishingUiState.Error -> {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF311B1B)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(uiState.message, color = Color.White)
                     }
                 }
             }
